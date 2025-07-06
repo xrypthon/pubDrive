@@ -103,5 +103,5 @@ app.get('/download/:id', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`Xrypthon PubDrive running on http://localhost:${PORT}`);
+  console.log(`Xrypthon PubDrive running on http://localhost:${PORT}`);
 });
