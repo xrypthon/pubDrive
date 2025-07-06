@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xrypthon PubDrive - Advanced Public File Storage</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">Xrypthon <span>PubDrive</span></h1>
+            <p class="tagline">Advanced Public File Storage with Password Protection</p>
+        </header>
+
+        <div class="upload-container">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-area" id="dropArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Drag & Drop your files here</p>
+                    <span>or</span>
+                    <label for="fileInput" class="browse-btn">Browse Files</label>
+                    <input type="file" id="fileInput" name="file" style="display: none;">
+                </div>
+                
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <div class="file-preview">
+                        <i class="fas fa-file" id="fileIcon"></i>
+                    </div>
+                    <div class="file-details">
+                        <p id="fileName"></p>
+                        <p id="fileSize"></p>
+                    </div>
+                    <button type="button" class="remove-btn" id="removeFile">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="protection-option">
+                    <input type="checkbox" id="protectFile" name="protectFile">
+                    <label for="protectFile">Password Protect this file</label>
+                    <div class="password-field" id="passwordField" style="display: none;">
+                        <input type="password" id="password" name="password" placeholder="Enter password (min 4 chars)">
+                        <i class="fas fa-eye" id="togglePassword"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="upload-btn" id="uploadBtn">
+                    <i class="fas fa-upload"></i> Upload File
+                </button>
+            </form>
+        </div>
+
+        <div class="file-list-container">
+            <h2>Public Files</h2>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search files...">
+                <i class="fas fa-search"></i>
+            </div>
+            
+            <div class="file-list" id="fileList">
+                <% files.forEach(file => { %>
+                    <div class="file-item" data-id="<%= file.id %>">
+                        <div class="file-icon">
+                            <i class="<%= getFileIcon(file.type) %>"></i>
+                        </div>
+                        <div class="file-details">
+                            <h3><%= file.name %></h3>
+                            <p><%= formatFileSize(file.size) %> • <%= new Date(file.uploadDate).toLocaleString() %></p>
+                        </div>
+                        <div class="file-actions">
+                            <% if (file.isProtected) { %>
+                                <button class="download-btn protected" data-id="<%= file.id %>">
+                                    <i class="fas fa-lock"></i> Protected
+                                </button>
+                            <% } else { %>
+                                <a href="/download/<%= file.id %>" class="download-btn">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal" id="passwordModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Enter Password</h3>
+            <p>This file is password protected. Please enter the correct password to download.</p>
+            <input type="password" id="modalPassword" placeholder="Enter password">
+            <p class="error-message" id="passwordError"></p>
+            <button id="submitPassword">Submit</button>
+        </div>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>
+
+<% function getFileIcon(mimeType) { 
+    const type = mimeType.split('/')[0];
+    const subtype = mimeType.split('/')[1];
+    
+    switch(type) {
+        case 'image':
+            return 'fas fa-file-image';
+        case 'video':
+            return 'fas fa-file-video';
+        case 'audio':
+            return 'fas fa-file-audio';
+        case 'application':
+            if (subtype.includes('pdf')) return 'fas fa-file-pdf';
+            if (subtype.includes('msword') || subtype.includes('wordprocessingml')) return 'fas fa-file-word';
+            if (subtype.includes('spreadsheetml')) return 'fas fa-file-excel';
+            if (subtype.includes('presentationml')) return 'fas fa-file-powerpoint';
+            if (subtype.includes('zip') || subtype.includes('compressed')) return 'fas fa-file-archive';
+            return 'fas fa-file-code';
+        case 'text':
+            return 'fas fa-file-alt';
+        default:
+            return 'fas fa-file';
+    }
+} %>
+
+<% function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+} %>
